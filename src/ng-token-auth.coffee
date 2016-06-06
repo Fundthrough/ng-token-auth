@@ -459,12 +459,12 @@ angular.module('ng-token-auth', ['ipCookie'])
           validateUser: (opts={}) ->
             configName = opts.config
 
-            unless @dfd?
+            if not @dfd or (@dfd? and opts.force)
               @initDfd()
 
               # save trip to API if possible. assume that user is still signed
               # in if auth headers are present and token has not expired.
-              if @userIsAuthenticated()
+              if @userIsAuthenticated() and not opts.force
                   # user is still presumably logged in
                   @resolveDfd()
 

@@ -55,7 +55,6 @@ suite 'token handling', ->
 
       $httpBackend.flush()
 
-
     test 'promise should be resolved', (done) ->
       dfd.then(->
         assert true
@@ -72,6 +71,35 @@ suite 'token handling', ->
 
       return false
 
+  suite 'force pull data', ->
+    setup ->
+      $httpBackend
+        .expectGET('/api/auth/validate_token')
+        .respond(201, successResp, newAuthHeader)
+
+      ipCookie('auth_headers', validAuthHeader, {path: '/'})
+
+      $auth.validateUser()
+
+      $httpBackend.flush()
+
+      $httpBackend
+        .expectGET('/api/auth/validate_token')
+        .respond(201, successResp, newAuthHeader)
+
+      ipCookie('auth_headers', validAuthHeader, {path: '/'})
+
+
+      dfd = $auth.validateUser(force: true)
+
+      $httpBackend.flush()
+
+    test 'subsequent calls to validateUser requires api requests if force option passed', (done) ->
+      dfd.then(->
+        assert true
+        done()
+      )
+      $timeout.flush()
 
   suite 'undefined headers', ->
     test 'validateUser should not make requests if no token is present', ->
@@ -112,7 +140,6 @@ suite 'token handling', ->
     teardown ->
       $httpBackend.flush()
 
-
   suite 'error response containing tokens', ->
     setup ->
       $httpBackend
@@ -137,7 +164,6 @@ suite 'token handling', ->
       $http.get('/api/test')
 
       $httpBackend.flush()
-
 
   suite 'invalid headers', ->
     setup ->
@@ -205,7 +231,6 @@ suite 'token handling', ->
         currentHeaders['access-token'],
         $auth.retrieveData('auth_headers')['access-token']
       )
-
 
   suite 'expired headers', ->
     expiredExpiry  = (new Date().getTime() / 1000) - 500 | 0
