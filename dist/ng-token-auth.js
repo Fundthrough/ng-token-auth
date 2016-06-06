@@ -427,9 +427,9 @@ angular.module('ng-token-auth', ['ipCookie']).provider('$auth', function() {
                 opts = {};
               }
               configName = opts.config;
-              if (this.dfd == null) {
+              if (!this.dfd || ((this.dfd != null) && opts.force)) {
                 this.initDfd();
-                if (this.userIsAuthenticated()) {
+                if (this.userIsAuthenticated() && !opts.force) {
                   this.resolveDfd();
                 } else {
                   search = $location.search();
